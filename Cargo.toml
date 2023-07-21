@@ -1,5 +1,5 @@
 [package]
-name        =     "Irony"
+name        =     "irony"
 version     =     "0.1.0"
 edition     =     "2021"
 authors     =     ["Kevin Coetsier"]
