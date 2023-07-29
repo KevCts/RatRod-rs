@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub struct Node {
-    pub x: i64, 
-    pub y: i64, 
-    pub z: i64 
+    pub x: f64, 
+    pub y: f64, 
+    pub z: f64 
 }
