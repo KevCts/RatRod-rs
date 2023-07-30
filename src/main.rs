@@ -1,13 +1,15 @@
+use model::Model;
 use node::Node;
 use elements::truss::Truss;
 use material::Material;
 use section::Section;
 use sparse_matrix::vector::Vector;
 
-mod node;
-mod elements;
-mod material;
-mod section;
+pub mod node;
+pub mod model;
+pub mod elements;
+pub mod material;
+pub mod section;
 
 fn main() {
     let test1 = Node {
@@ -36,11 +38,13 @@ fn main() {
         section     :   &sec,
     };
 
-    let matrix = test.get_matrix();
+    let model = Model::new(1);
+
+    let matrix = test.get_matrix(model.dimension);
 
     let problem = matrix.to_csr();
 
-    let f = Vector {values : vec![2100000.,0.,0.,0.,0.,0.,-2100000.,0.,0.,0.,0.,0.]};
+    let f = Vector {values : vec![2100000.,-2100000.]};
 
     let u = problem.minres(f, 0.);
 
