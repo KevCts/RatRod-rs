@@ -3,14 +3,14 @@ use sparse_matrix::matrix::coo_mat::CooMat;
 use crate::{node::Node, material::Material, section::Section};
 
 #[derive(Debug, PartialEq)]
-pub struct Truss<'a, 'b, 'c, 'd> {
-    pub nodes : (&'a Node, &'b Node),
-    pub material : &'c Material,
-    pub section : &'d Section
+pub struct Truss<'a> {
+    pub nodes : (&'a Node, &'a Node),
+    pub material : &'a Material,
+    pub section : &'a Section
 
 }
 
-impl Truss<'_, '_, '_, '_> {
+impl Truss<'_> {
     pub fn get_length(&self) -> f64{
         let (node1, node2) = self.nodes;
         ((node1.x - node2.x)*(node1.x - node2.x) + (node1.y - node2.y)*(node1.y - node2.y) + (node1.z - node2.z)*(node1.z - node2.z)).sqrt()

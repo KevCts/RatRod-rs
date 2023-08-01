@@ -40,25 +40,18 @@ fn main() {
 
     let mut model = Model::new(1);
 
-    let matrix = test.get_matrix(model.dimension);
-
-    let mut f = Vector {values : vec![2100000.,2100000.]};
+    let f = Vector {values : vec![2100000.,2100000.]};
 
     model.u_boundary_conditions[0] = Some(0.);
 
-    let reduced_problem = model.reduce(&matrix, &f);
+    model.f = f.clone();
 
-    let (m_r, f_r) = reduced_problem;
+    model.m = test.get_matrix(model.dimension);
 
-    let p_r = m_r.to_csr();
+    model.solve();
 
-    let u_r = p_r.minres(f_r.clone(), 0.).unwrap();
-
-    let u = model.developp(u_r.clone());
-
-    let problem = matrix.to_csr();
-
-    f = (&problem * &u).unwrap();
+    let u = model.u;
+    let f = model.f;
 
     println!("{u:?}");
     println!("{f:?}");

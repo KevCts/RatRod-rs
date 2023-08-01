@@ -11,4 +11,4 @@ license     =     "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sparse_matrix = "0.4.4"
+sparse_matrix = "0.4.6"
