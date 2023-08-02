@@ -1,9 +1,10 @@
 use model::Model;
 use node::Node;
-use elements::truss::Truss;
 use material::Material;
 use section::Section;
 use sparse_matrix::vector::Vector;
+
+use crate::elements::ElementType;
 
 pub mod node;
 pub mod model;
@@ -12,41 +13,26 @@ pub mod material;
 pub mod section;
 
 fn main() {
-    let test1 = Node {
+    let mut model = Model::new(3);
+    model.add_node(Node {
         x : 0.,
         y : 0.,
         z : 0.
-    };
-
-    let test2 = Node {
+    }).add_node(Node {
         x : 1.,
         y : 0.,
         z : 0.
-    };
-
-    let mat = Material {
+    }).add_material(Material {
         e : 210_000.
-    };
-
-    let sec = Section {
+    }).add_section(Section {
         s : 10.
-    };
-
-    let test = Truss {
-        nodes       :   (&test1, &test2),
-        material    :   &mat,
-        section     :   &sec,
-    };
-
-    let mut model = Model::new(1);
-
-    let f = Vector {values : vec![2100000.,2100000.]};
+    }).add_element(ElementType::Truss, vec![0,1], 0, 0);
 
     model.u_boundary_conditions[0] = Some(0.);
+    model.u_boundary_conditions[1] = Some(0.);
+    model.u_boundary_conditions[2] = Some(0.);
 
-    model.f = f.clone();
-
-    model.m = test.get_matrix(model.dimension);
+    model.f = Vector {values : vec![2100000., 0., 0., 2100000., 0., 0.]};
 
     model.solve();
 

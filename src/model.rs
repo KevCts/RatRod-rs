@@ -1,59 +1,114 @@
+use std::{collections::HashMap, rc::Rc};
+
 use sparse_matrix::{matrix::coo_mat::CooMat, vector::Vector};
+
+use crate::{elements::{Element, ElementType, truss::Truss, ElementTrait}, node::Node, material::Material, section::Section};
 
 #[derive(Debug)]
 pub struct Model{
     pub dimension               :   u8,
+    pub degrees_of_freedom      :   u8,
     pub f                       :   Vector, 
     pub u                       :   Vector, 
     pub m                       :   CooMat, 
     pub f_r                     :   Vector, 
     pub u_r                     :   Vector, 
     pub m_r                     :   CooMat, 
-    pub u_boundary_conditions   :   Vec<Option<f64>>
+    pub u_boundary_conditions   :   Vec<Option<f64>>,
+    pub elements                :   HashMap<Vec<usize>,Box<Element>>,
+    pub nodes                   :   Vec<Rc<Node>>,
+    pub materials               :   Vec<Rc<Material>>,
+    pub sections                :   Vec<Rc<Section>>
 }
 
 impl Model{
     pub fn new(dim : u8) -> Self{
+        let dof = match dim {
+            1 => 1,
+            2 => 3,
+            3 => 3,
+            _ => panic!()
+        };
         Model {
-            dimension               : dim,
-            f                       :   Vector::null(2 * ((3.0_f64).powf((dim as f64) - 1.)) as usize),
-            u                       :   Vector::null(2 * ((3.0_f64).powf((dim as f64) - 1.)) as usize),
-            m                       :   CooMat::new(2 * ((3.0_f64).powf((dim as f64) - 1.)) as usize,2 * ((3.0_f64).powf((dim as f64) - 1.) as usize)),
+            degrees_of_freedom      :   dof,
+            dimension               :   dim,
+            f                       :   Vector::null(0),
+            u                       :   Vector::null(0),
+            m                       :   CooMat::new(0, 0),
             f_r                     :   Vector::null(0),
             u_r                     :   Vector::null(0),
-            m_r                     :   CooMat::new(2 * ((3.0_f64).powf((dim as f64) - 1.)) as usize,2 * ((3.0_f64).powf((dim as f64) - 1.) as usize)),
-            u_boundary_conditions : vec![None; 2 * ((3.0_f64).powf((dim as f64) - 1.)) as usize]
+            m_r                     :   CooMat::new(0,0),
+            u_boundary_conditions   :   vec![],
+            elements                :   HashMap::new(),
+            nodes                   :   vec![],
+            materials               :   vec![],
+            sections                :   vec![]
         }
     }
 
-    pub fn solve(&mut self) -> &Self{
+    pub fn add_element(&mut self, element : ElementType, nodes : Vec<usize>, material : usize, section : usize) -> &mut Self{
+        self.elements.insert(nodes.clone(), Box::new(
+                             match element {
+                                 ElementType::Truss => Element::Truss(Truss { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()})
+                             }));
+        self
+    }
+
+    pub fn add_node(&mut self, node : Node) -> &mut Self {
+        self.nodes.push(Rc::new(node));
+        self.m.rows += self.degrees_of_freedom as usize;
+        self.m.columns += self.degrees_of_freedom as usize;
+        for _ in 0..self.degrees_of_freedom{
+            self.f.values.push(0.);
+            self.u.values.push(0.);
+            self.u_boundary_conditions.push(None);
+        }
+        self
+    }
+
+    pub fn add_material(&mut self, material : Material) -> &mut Self {
+        self.materials.push(Rc::new(material));
+        self
+    }
+
+    pub fn add_section(&mut self, section : Section) -> &mut Self {
+        self.sections.push(Rc::new(section));
+        self
+    }
+
+    pub fn solve(&mut self) -> &mut Self{
+        for (nodes, element) in &self.elements {
+            self.m += element.get_matrix(self.dimension, self.m.rows, nodes);
+        }
         self.reduce();
         let p_r = self.m_r.to_csr();
-        self.u_r = p_r.minres(&self.f_r, 0.).unwrap();
+        self.u_r = p_r.minres(&self.f_r, 0.5).unwrap();
         self.developp();
         let problem = self.m.to_csr();
         self.f = (&problem * &self.u).unwrap();
         self
     }
 
-    pub fn reduce(&mut self) -> &Self {
+    pub fn reduce(&mut self) -> &mut Self {
         self.m_r  = self.m.clone();
         let mut reduced_vector = vec![];
+        let mut j = 0;
         for i in 0..self.u_boundary_conditions.len(){
             if self.u_boundary_conditions[i] != None {
-                self.m_r.drop_row(i);
-                self.m_r.drop_col(i);
+                self.m_r.drop_row(j);
+                self.m_r.drop_col(j);
                 self.m_r.rows -= 1;
                 self.m_r.columns -= 1;
             } else {
                 reduced_vector.push(self.f.values[i]);
+                j+=1;
             }
         }
         self.f_r = Vector { values : reduced_vector };
         self
     }
 
-    pub fn developp(&mut self) -> &Self {
+    pub fn developp(&mut self) -> &mut Self {
         let mut j = 0;
         for i in 0..self.u_boundary_conditions.len(){
             match self.u_boundary_conditions[i] {
