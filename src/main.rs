@@ -2,7 +2,6 @@ use model::Model;
 use node::Node;
 use material::Material;
 use section::Section;
-use sparse_matrix::vector::Vector;
 
 use crate::elements::ElementType;
 
@@ -13,7 +12,7 @@ pub mod material;
 pub mod section;
 
 fn main() {
-    let mut model = Model::new(3);
+    let mut model = Model::new(2, 0.00001);
     model.add_node(Node {
         x : 0.,
         y : 0.,
@@ -22,24 +21,28 @@ fn main() {
         x : 1.,
         y : 0.,
         z : 0.
+    }).add_node(Node {
+        x : 0.,
+        y : 1.,
+        z : 0.
     }).add_material(Material {
-        e : 210_000.
+        e : 1.
     }).add_section(Section {
-        s : 10.
-    }).add_element(ElementType::Truss, vec![0,1], 0, 0);
-
-    model.u_boundary_conditions[0] = Some(0.);
-    model.u_boundary_conditions[1] = Some(0.);
-    model.u_boundary_conditions[2] = Some(0.);
-
-    model.f = Vector {values : vec![2100000., 0., 0., 2100000., 0., 0.]};
+        s : 1.
+    }).add_element(ElementType::Truss, vec![0,1], 0, 0)
+    .add_element(ElementType::Truss, vec![1,2], 0, 0)
+    .add_u_boundary_condition(0, 0, 0.)
+    .add_u_boundary_condition(0, 1, 0.)
+    .add_u_boundary_condition(2, 0, 0.)
+    .add_u_boundary_condition(2, 1, 0.)
+    .set_force(1, 1, -1.);
 
     model.solve();
 
     let u = model.u;
     let f = model.f;
 
-    println!("{u:?}");
-    println!("{f:?}");
+    println!("u = {u:?}");
+    println!("f = {f:?}");
 
 }

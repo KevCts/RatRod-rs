@@ -6,6 +6,7 @@ use crate::{elements::{Element, ElementType, truss::Truss, ElementTrait}, node::
 
 #[derive(Debug)]
 pub struct Model{
+    pub epsilon                 :   f64,
     pub dimension               :   u8,
     pub degrees_of_freedom      :   u8,
     pub f                       :   Vector, 
@@ -22,7 +23,7 @@ pub struct Model{
 }
 
 impl Model{
-    pub fn new(dim : u8) -> Self{
+    pub fn new(dim : u8, epsilon : f64) -> Self{
         let dof = match dim {
             1 => 1,
             2 => 3,
@@ -30,6 +31,7 @@ impl Model{
             _ => panic!()
         };
         Model {
+            epsilon,
             degrees_of_freedom      :   dof,
             dimension               :   dim,
             f                       :   Vector::null(0),
@@ -82,7 +84,7 @@ impl Model{
         }
         self.reduce();
         let p_r = self.m_r.to_csr();
-        self.u_r = p_r.minres(&self.f_r, 0.5).unwrap();
+        self.u_r = p_r.minres(&self.f_r, self.epsilon).unwrap();
         self.developp();
         let problem = self.m.to_csr();
         self.f = (&problem * &self.u).unwrap();
@@ -119,6 +121,21 @@ impl Model{
                 },
             }
         }
+        self
+    }
+
+    pub fn add_u_boundary_condition(&mut self, node : usize, field : u8, value : f64) -> &mut Self {
+        self.u_boundary_conditions[self.degrees_of_freedom  as usize * node + field as usize] = Some(value);
+        self
+    }
+
+    pub fn remove_u_boundary_condition(&mut self, node : usize, field : u8) -> &mut Self {
+        self.u_boundary_conditions[self.degrees_of_freedom  as usize * node + field as usize] = None;
+        self
+    }
+
+    pub fn set_force(&mut self, node : usize, field : u8, value : f64) -> &mut Self{
+        self.f.values[self.degrees_of_freedom as usize * node + field as usize] = value;
         self
     }
 }
