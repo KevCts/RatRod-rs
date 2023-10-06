@@ -2,7 +2,7 @@ use std::{collections::HashMap, rc::Rc};
 
 use sparse_matrix::{matrix::coo_mat::CooMat, vector::Vector};
 
-use crate::{elements::{Element, ElementType, truss::Truss, ElementTrait}, node::Node, material::Material, section::Section};
+use crate::{elements::{Element, ElementType, truss::Truss, beam::Beam, ElementTrait}, node::Node, material::Material, section::Section};
 
 #[derive(Debug)]
 pub struct Model{
@@ -51,7 +51,8 @@ impl Model{
     pub fn add_element(&mut self, element : ElementType, nodes : Vec<usize>, material : usize, section : usize) -> &mut Self{
         self.elements.insert(nodes.clone(), Box::new(
                              match element {
-                                 ElementType::Truss => Element::Truss(Truss { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()})
+                                 ElementType::Truss => Element::Truss(Truss { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()}),
+                                 ElementType::Beam => Element::Beam(Beam { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()})
                              }));
         self
     }

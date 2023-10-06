@@ -39,7 +39,22 @@ impl Beam{
                 matrix.add_value(i + 3*y, 3*x + j, -1. * truss_stiffness * c[i] * c[j]);
                 matrix.add_value(3*x + i, j + 3*y, -1. * truss_stiffness * c[i] * c[j]);
                 matrix.add_value(i + 3*y, j + 3*y, truss_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 1, 3*x + j + 1, 12 * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*x + j + 1, 12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*x + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*x + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*x + j + 1, -12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*x + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*x + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*y + j + 1, -12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*y + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*y + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*y + j + 1, 12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*y + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*y + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
             }
         }
 
@@ -49,6 +64,7 @@ impl Beam{
     pub fn get_3_d_matrix(&self, mat_size : usize, x:usize, y:usize) -> CooMat {
         let l = self.get_length();
         let truss_stiffness = self.material.e * self.section.s / l;
+        let beam_stiffness = self.material.e * self.section.i / l / l / l;
         let (node1, node2) = &self.nodes;
         let c = [(node1.x - node2.x)/l, (node1.y - node2.y)/l, (node1.z - node2.z)/l];
         let mut matrix = CooMat::new(mat_size, mat_size);
@@ -59,6 +75,22 @@ impl Beam{
                 matrix.add_value(i + 3*y, 3*x + j, -1. * truss_stiffness * c[i] * c[j]);
                 matrix.add_value(3*x + i, j + 3*y, -1. * truss_stiffness * c[i] * c[j]);
                 matrix.add_value(i + 3*y, j + 3*y, truss_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*x + j + 1, 12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*x + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*x + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*x + j + 1, -12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*x + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*x + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*y + j + 1, -12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 1, 3*y + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*x + i + 2, 3*y + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*y + j + 1, 12. * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 1, 3*y + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
+                matrix.add_value(3*y + i + 2, 3*y + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
             }
         }
 
