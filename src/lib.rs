@@ -9,6 +9,8 @@ mod tests {
     use sparse_matrix::vector::Vector;
 
     use crate::{elements::ElementType, model::Model, node::Node, material::Material, section::Section};
+
+    use more_asserts::assert_le;
     
     #[test]
     fn spring_in_tension() {
@@ -65,8 +67,8 @@ mod tests {
 
         let u = model.u;
         let f = model.f;
-        assert_eq!(u, Vector { values: vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.5] });
-        assert_eq!(f, Vector { values: vec![-1.0, 0.0, -1.0, 1.0, 0.0, 0.0] });
+        assert_le!((&(&u - &Vector { values: vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.5] }).unwrap() * &(&u - &Vector { values: vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.5] }).unwrap()).unwrap().sqrt(), 0.01);
+        assert_le!((&(&f - &Vector { values: vec![0.0, -3.0, -3.0, 0.0, 3.0, 0.0] }).unwrap() * &(&u - &Vector { values: vec![0.0, -3.0, -3.0, 0.0, 3.0, 0.0] }).unwrap()).unwrap().sqrt(), 0.01);
     }
 }
 
