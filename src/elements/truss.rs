@@ -4,7 +4,9 @@ use std::rc::Rc;
 
 use crate::{node::Node, material::Material, section::Section};
 
-#[derive(Debug, PartialEq)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Truss {
     pub nodes : (Rc<Node>, Rc<Node>),
     pub material : Rc<Material>,

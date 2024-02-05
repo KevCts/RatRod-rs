@@ -1,10 +1,14 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, fs::{self, File}, process::exit, io::Write};
 
 use sparse_matrix::{matrix::coo_mat::CooMat, vector::Vector};
 
 use crate::{elements::{Element, ElementType, truss::Truss, beam::Beam, ElementTrait}, node::Node, material::Material, section::Section};
 
-#[derive(Debug)]
+use serde::{Serialize, Deserialize};
+
+use serde_json_any_key::any_key_map;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Model{
     pub epsilon                 :   f64,
     pub dimension               :   u8,
@@ -16,6 +20,7 @@ pub struct Model{
     pub u_r                     :   Vector, 
     pub m_r                     :   CooMat, 
     pub u_boundary_conditions   :   Vec<Option<f64>>,
+    #[serde(with = "any_key_map")]
     pub elements                :   HashMap<Vec<usize>,Box<Element>>,
     pub nodes                   :   Vec<Rc<Node>>,
     pub materials               :   Vec<Rc<Material>>,
@@ -48,12 +53,17 @@ impl Model{
         }
     }
 
+    pub fn save(&self, file: &str) {
+        let to_write = serde_json::to_string(&self).expect("Unable to serialize model");
+        fs::write(file, to_write).expect("Unable to write file");
+    }
+
     pub fn add_element(&mut self, element : ElementType, nodes : Vec<usize>, material : usize, section : usize) -> &mut Self{
         self.elements.insert(nodes.clone(), Box::new(
-                             match element {
-                                 ElementType::Truss => Element::Truss(Truss { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()}),
-                                 ElementType::Beam => Element::Beam(Beam { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()})
-                             }));
+                match element {
+                    ElementType::Truss => Element::Truss(Truss { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()}),
+                    ElementType::Beam => Element::Beam(Beam { nodes : (self.nodes[nodes[0]].clone(), self.nodes[nodes[1]].clone()), material : self.materials[material].clone(), section : self.sections[section].clone()})
+                }));
         self
     }
 

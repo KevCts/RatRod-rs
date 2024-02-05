@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub x: f64, 
     pub y: f64, 

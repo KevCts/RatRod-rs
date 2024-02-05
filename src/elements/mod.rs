@@ -5,7 +5,9 @@ use self::{truss::Truss, beam::Beam};
 pub mod truss;
 pub mod beam;
 
-#[derive(Debug)]
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Element {
     Truss(Truss),
     Beam(Beam),
