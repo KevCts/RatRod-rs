@@ -8,7 +8,7 @@ use serde::{Serialize, Deserialize};
 
 use serde_json_any_key::any_key_map;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Model{
     pub epsilon                 :   f64,
     pub dimension               :   u8,
@@ -56,6 +56,11 @@ impl Model{
     pub fn save(&self, file: &str) {
         let to_write = serde_json::to_string(&self).expect("Unable to serialize model");
         fs::write(file, to_write).expect("Unable to write file");
+    }
+
+    pub fn load(file: &str) -> Self {
+        let file_content = fs::read_to_string(file).expect("Unable to read file");
+        serde_json::from_str(&file_content).expect("Unable to process the file")
     }
 
     pub fn add_element(&mut self, element : ElementType, nodes : Vec<usize>, material : usize, section : usize) -> &mut Self{
