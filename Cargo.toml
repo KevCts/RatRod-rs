@@ -1,5 +1,5 @@
 [package]
-name        =     "RatRod.rs"
+name        =     "RatRod-rs"
 version     =     "0.1.0"
 edition     =     "2021"
 authors     =     ["Kevin Coetsier"]
