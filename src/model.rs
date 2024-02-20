@@ -32,7 +32,7 @@ impl Model{
         let dof = match dim {
             1 => 1,
             2 => 3,
-            3 => 3,
+            3 => 6,
             _ => panic!()
         };
         Model {

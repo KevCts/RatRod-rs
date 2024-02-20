@@ -1,5 +1,8 @@
-# Irony
+# RatRod.rs
 An FEM implementation written in Rust
+
+## Disclaimer
+This library is mainly a personal project. It's neither qualified neither guarantied and should not be used to assess actual mechanical structures.
 
 ## How to use it ?
 The library is built around the Model class.

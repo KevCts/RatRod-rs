@@ -1,11 +1,11 @@
 [package]
-name        =     "irony"
+name        =     "RatRod.rs"
 version     =     "0.1.0"
 edition     =     "2021"
 authors     =     ["Kevin Coetsier"]
 description =     "An FEM implementation written in Rust"
 readme      =     "README.md"
-repository  =     "https://github.com/KevCts/Irony"
+repository  =     "https://github.com/KevCts/RatRod.rs"
 license     =     "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
