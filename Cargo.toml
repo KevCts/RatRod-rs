@@ -1,6 +1,6 @@
 [package]
 name        =     "RatRod-rs"
-version     =     "0.1.0"
+version     =     "0.2.0"
 edition     =     "2021"
 authors     =     ["Kevin Coetsier"]
 description =     "An FEM implementation written in Rust"
@@ -16,4 +16,4 @@ more-asserts = "0.3.1"
 serde = { version = "1.0.196", features = ["derive", "rc"] }
 serde_json = "1.0.113"
 serde_json_any_key = "2.0.0"
-sparse_matrix = "0.6.0"
+sparse_matrix = "0.6.2"

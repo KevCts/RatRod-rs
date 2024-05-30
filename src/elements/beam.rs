@@ -33,32 +33,42 @@ impl Beam{
         let truss_stiffness = self.material.e * self.section.s / l;
         let beam_stiffness = self.material.e * self.section.i / l / l / l;
         let (node1, node2) = &self.nodes;
-        let c = [(node1.x - node2.x)/l, (node1.y - node2.y)/l];
         let mut matrix = CooMat::new(mat_size, mat_size);
-        for i in 0..2 {
-            for j in 0..2 {
-                matrix.add_value(3*x + i, 3*x + j, truss_stiffness * c[i] * c[j]);
-                matrix.add_value(i + 3*y, 3*x + j, -1. * truss_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i, j + 3*y, -1. * truss_stiffness * c[i] * c[j]);
-                matrix.add_value(i + 3*y, j + 3*y, truss_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 1, 3*x + j + 1, 12. * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 1, 3*x + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 2, 3*x + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 1, 3*x + j + 1, -12. * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 2, 3*x + j + 1, 6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 1, 3*x + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 2, 3*x + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 1, 3*y + j + 1, -12. * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 1, 3*y + j + 2, 6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*x + i + 2, 3*y + j + 2, 2. * l * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 1, 3*y + j + 1, 12. * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 2, 3*y + j + 1, -6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 1, 3*y + j + 2, -6. * l * beam_stiffness * c[i] * c[j]);
-                matrix.add_value(3*y + i + 2, 3*y + j + 2, 4. * l * l * beam_stiffness * c[i] * c[j]);
-            }
-        }
+        matrix.add_value(3*x    , 3*x    , truss_stiffness);
+        matrix.add_value(3*y    , 3*x    , -1. * truss_stiffness);
+        matrix.add_value(3*x    , 3*y    , -1. * truss_stiffness);
+        matrix.add_value(3*y    , 3*y    , truss_stiffness);
+        matrix.add_value(3*x + 1, 3*x + 1, 12. * beam_stiffness);
+        matrix.add_value(3*x + 2, 3*x + 1, 6. * l * beam_stiffness);
+        matrix.add_value(3*x + 1, 3*x + 2, 6. * l * beam_stiffness);
+        matrix.add_value(3*x + 2, 3*x + 2, 4. * l * l * beam_stiffness);
+        matrix.add_value(3*y + 1, 3*x + 1, -12. * beam_stiffness);
+        matrix.add_value(3*y + 2, 3*x + 1, 6. * l * beam_stiffness);
+        matrix.add_value(3*y + 1, 3*x + 2, -6. * l * beam_stiffness);
+        matrix.add_value(3*y + 2, 3*x + 2, 2. * l * l * beam_stiffness);
+        matrix.add_value(3*x + 1, 3*y + 1, -12. * beam_stiffness);
+        matrix.add_value(3*x + 2, 3*y + 1, -6. * l * beam_stiffness);
+        matrix.add_value(3*x + 1, 3*y + 2, 6. * l * beam_stiffness);
+        matrix.add_value(3*x + 2, 3*y + 2, 2. * l * l * beam_stiffness);
+        matrix.add_value(3*y + 1, 3*y + 1, 12. * beam_stiffness);
+        matrix.add_value(3*y + 2, 3*y + 1, -6. * l * beam_stiffness);
+        matrix.add_value(3*y + 1, 3*y + 2, -6. * l * beam_stiffness);
+        matrix.add_value(3*y + 2, 3*y + 2, 4. * l * l * beam_stiffness);
+        let mut rotation = CooMat::new(mat_size, mat_size);
+        let c = (node1.x - node2.x).abs()/l;
+        let s = (node1.y - node2.y).abs()/l;
+        rotation.add_value(3*x    , 3*x    ,  c);
+        rotation.add_value(3*x + 1, 3*x    , -s);
+        rotation.add_value(3*x    , 3*x + 1,  s);
+        rotation.add_value(3*x + 1, 3*x + 1,  c);
+        rotation.add_value(3*x + 2, 3*x + 2,  1.);
+        rotation.add_value(3*y    , 3*y    ,  c);
+        rotation.add_value(3*y + 1, 3*y    , -s);
+        rotation.add_value(3*y    , 3*y + 1,  s);
+        rotation.add_value(3*y + 1, 3*y + 1,  c);
+        rotation.add_value(3*y + 2, 3*y + 2,  1.);
+
+        matrix = &(rotation.transposed()) * &(&matrix * &rotation);
 
         matrix
     }
