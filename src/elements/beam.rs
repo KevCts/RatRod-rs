@@ -53,17 +53,19 @@ impl Beam{
         matrix.add_value(3*y + 2, 3*y + 1, -6. * l * beam_stiffness);
         matrix.add_value(3*y + 1, 3*y + 2, -6. * l * beam_stiffness);
         matrix.add_value(3*y + 2, 3*y + 2, 4. * l * l * beam_stiffness);
-        let mut rotation = CooMat::identity(mat_size);
+        let mut rotation = CooMat::new(mat_size, mat_size);
         let c = (node1.x - node2.x).abs()/l;
         let s = (node1.y - node2.y).abs()/l;
         rotation.add_value(3*x    , 3*x    ,  c);
         rotation.add_value(3*x + 1, 3*x    , -s);
         rotation.add_value(3*x    , 3*x + 1,  s);
         rotation.add_value(3*x + 1, 3*x + 1,  c);
+        rotation.add_value(3*x + 2, 3*x + 2,  1.);
         rotation.add_value(3*y    , 3*y    ,  c);
         rotation.add_value(3*y + 1, 3*y    , -s);
         rotation.add_value(3*y    , 3*y + 1,  s);
         rotation.add_value(3*y + 1, 3*y + 1,  c);
+        rotation.add_value(3*y + 2, 3*y + 2,  1.);
 
         matrix = &(rotation.transposed()) * &(&matrix * &rotation);
 
